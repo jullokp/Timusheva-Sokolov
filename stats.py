@@ -11,3 +11,4 @@ def calculate_stats(numbers):
 if __name__ == "__main__":
     print(calculate_stats([1, 2, 3, 4, 5]))
 #нужно добавить функции, тут мало
+#понял, добавлю
