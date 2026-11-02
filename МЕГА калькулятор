@@ -1,0 +1,92 @@
+import math
+import re
+
+
+class Calculator:
+    """Калькулятор с историей, расширенными операциями и разбором выражений."""
+
+    def __init__(self):
+        self.history = []
+
+    def _log(self, expression, result):
+        self.history.append(f"{expression} = {result}")
+        return result
+
+    # --- базовые операции ---
+    def add(self, a, b):
+        return self._log(f"{a} + {b}", a + b)
+
+    def sub(self, a, b):
+        return self._log(f"{a} - {b}", a - b)
+
+    def mul(self, a, b):
+        return self._log(f"{a} * {b}", a * b)
+
+    def div(self, a, b):
+        if b == 0:
+            raise ZeroDivisionError("Деление на ноль невозможно")
+        return self._log(f"{a} / {b}", a / b)
+
+    # --- расширенные операции ---
+    def power(self, a, b):
+        return self._log(f"{a} ** {b}", a ** b)
+
+    def mod(self, a, b):
+        if b == 0:
+            raise ZeroDivisionError("Остаток от деления на ноль невозможен")
+        return self._log(f"{a} % {b}", a % b)
+
+    def sqrt(self, a):
+        if a < 0:
+            raise ValueError("Корень из отрицательного числа не определён")
+        return self._log(f"sqrt({a})", math.sqrt(a))
+
+    # --- разбор строкового выражения ---
+    def evaluate(self, expression):
+        """Считает выражение вида '2 + 3 * 4'. Поддерживает + - * / ** и скобки."""
+        if not re.fullmatch(r"[\d\s\.\+\-\*/\(\)]+", expression):
+            raise ValueError(f"Недопустимые символы в выражении: {expression}")
+
+        # Безопасный eval: разрешаем только арифметику
+        allowed = {"__builtins__": {}}
+        try:
+            result = eval(expression, allowed)  # noqa: S307
+        except ZeroDivisionError:
+            raise ZeroDivisionError("Деление на ноль в выражении")
+        except Exception as e:
+            raise ValueError(f"Не удалось вычислить '{expression}': {e}")
+
+        return self._log(expression, result)
+
+    # --- история ---
+    def show_history(self):
+        if not self.history:
+            print("История пуста")
+            return
+        for i, entry in enumerate(self.history, 1):
+            print(f"{i}. {entry}")
+
+    def clear_history(self):
+        self.history.clear()
+
+    def last_result(self):
+        if not self.history:
+            return None
+        # Берём число после последнего ' = '
+        return float(self.history[-1].rsplit(" = ", 1)[1])
+
+    def __str__(self):
+        return f"Calculator (операций в истории: {len(self.history)})"
+
+
+if __name__ == "__main__":
+    calc = Calculator()
+    print(calc.add(2, 3))              # 5
+    print(calc.power(2, 10))           # 1024
+    print(calc.sqrt(144))              # 12.0
+    print(calc.mod(17, 5))             # 2
+    print(calc.evaluate("2 + 3 * 4"))  # 14
+    print(calc.evaluate("(2 + 3) * 4"))# 20
+    print("Последний результат:", calc.last_result())
+    calc.show_history()
+    print(calc)
