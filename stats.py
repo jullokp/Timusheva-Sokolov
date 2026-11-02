@@ -1,5 +1,5 @@
 def calculate_stats(numbers):
-    total = sum(numbers)
+    total = sum(numbers) #сумма
     average = total / len(numbers)
     return {
         "sum": total,
